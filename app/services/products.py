@@ -9,7 +9,22 @@ class ProductService:
     def get_all_products(db: Session, page: int, limit: int, search: str = ""):
         products = db.query(Product).order_by(Product.id.asc()).filter(
             Product.title.contains(search)).limit(limit).offset((page - 1) * limit).all()
-        return {"message": f"Page {page} with {limit} products", "data": products}
+        
+        # Convert products to list of dictionaries with all needed fields
+        products_data = []
+        for product in products:
+            products_data.append({
+                "id": product.id,
+                "title": product.title,
+                "price": product.price,
+                "old_price": product.old_price if hasattr(product, 'old_price') else None,
+                "category": product.category.name if product.category else "Uncategorized",
+                "image_url": f"/static/images/products/{product.image}" if product.image else "/static/images/products/default.jpg",
+                "rating": product.rating if hasattr(product, 'rating') else 0,
+                "description": product.description
+            })
+        
+        return {"message": f"Page {page} with {limit} products", "data": products_data}
 
     @staticmethod
     def get_product(db: Session, product_id: int):

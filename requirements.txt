@@ -34,3 +34,4 @@ typing_extensions==4.8.0
 uvicorn==0.24.0.post1
 watchfiles==0.21.0
 websockets==12.0
+jinja2==3.1.2

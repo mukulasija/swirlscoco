@@ -1,6 +1,20 @@
 from app.routers import products, categories, carts, users, auth, accounts
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
+from fastapi import Request
 
+# Get the base directory
+BASE_DIR = Path(__file__).resolve().parent
+
+# Setup templates
+templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
+
+# Mount static files
+app = FastAPI()
+app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 
 description = """
 Welcome to the E-commerce API! 🚀
@@ -47,9 +61,18 @@ app = FastAPI(
 )
 
 
+@app.get("/", response_class=HTMLResponse)
+async def read_root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
+
 app.include_router(products.router)
 app.include_router(categories.router)
 app.include_router(carts.router)
 app.include_router(users.router)
 app.include_router(accounts.router)
 app.include_router(auth.router)
+
+# Handler for Vercel
+app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
+handler = app
